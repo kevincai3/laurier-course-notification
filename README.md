@@ -13,3 +13,4 @@ Scrapes a WLU class endpoint and sends an email through mailgun if the available
 - [ ] Change config file to yaml.
 - [ ] Better documentation.
 - [ ] Multiple endpoints.
+- [ ] Better logging
