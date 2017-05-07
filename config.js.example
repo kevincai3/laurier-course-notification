@@ -1,0 +1,11 @@
+module.exports = {
+  url: 'URL TO LAURIER ENDPOINT',
+  mailgun: {
+    apiKey: 'YOUR API KEY',
+    domain: 'YOUR DOMAIN',
+    from: 'YOUR FROM FIELD'
+  },
+  targets: [
+    'LIST YOUR PERSONAL EMAILS HERE'
+  ]
+}
