@@ -25,7 +25,7 @@ function sendEmails(content, header) {
     mailgun.messages().send({
       from: config.mailgun.from,
       to: config.targets.join(','),
-      subject: `Laurier Course Alerter - ${header}`,
+      subject: `Laurier Course Alerter For BU493 - ${header}`,
       text: content,
     }, (err, body) => {
       if (err) return reject(err)
