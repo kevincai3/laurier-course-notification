@@ -5,7 +5,7 @@ const _ = require('lodash')
 const log = require('./logger')
 
 const mailgun = Mailgun({
-  apiKey: config.mailgun.apikey,
+  apiKey: config.mailgun.apiKey,
   domain: config.mailgun.domain,
 })
 

@@ -6,9 +6,6 @@ const log = require('./logger')
 
 const config = require('./config')
 const emails = require('./email')
-const CAPACITY_SELECTOR = 'body > div.pagebodydiv > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(2)'
-
-const ACTUAL_SELECTOR = 'body > div.pagebodydiv > table:nth-child(7) > tbody > tr:nth-child(2) > td:nth-child(3)'
 
 // Time in seconds
 const HEARTBEAT_TIME = 60 * 24
@@ -29,22 +26,24 @@ function serializeMeta(meta) {
 
 // Checks the website for available seats
 // @returns {Number} (capacity) - (current registration)
-async function availableSeats() {
-  const html = await request(config.url)
+async function getAvailableSeats() {
+  return Promise.all(config.links.map(async link => {
+    const html = await request(link.url)
 
-  const document = new Jsdom(html).window.document
+    const document = new Jsdom(html).window.document
 
-  const capacity = document.querySelector(CAPACITY_SELECTOR).innerHTML
-  const actual = document.querySelector(ACTUAL_SELECTOR).innerHTML
-  log(`Fetched data; the result is ${capacity - actual}`)
+    const capacity = document.querySelector(link.capacity_selector).innerHTML
+    const actual = document.querySelector(link.actual_selector).innerHTML
+    log(`Fetched data; the result is ${capacity - actual}`)
 
-  return capacity - actual
+    return parseInt(capacity) - parseInt(actual)
+  }))
 }
 
 function updateMeta(meta, currentTime, seats) {
   let func = () => new Promise(resolve => resolve(false))
   meta.lastCheck = currentTime
-  if (seats === meta.availableSeats) {
+  if (_.isEqual(seats, meta.availableSeats)) {
     // If the last email was sent over a day ago
     if (currentTime - meta.lastEmail > 1000 * HEARTBEAT_TIME) {
       func = () => emails.heartbeat(serializeMeta(meta))
@@ -65,12 +64,12 @@ function main(tickTime) {
       lastChange: undefined,
       lastCheck: undefined,
     },
-    availableSeats: undefined,
+    availableSeats: [],
   }
 
   const runner = async function() {
     try {
-      const seats = await availableSeats()
+      const seats = await getAvailableSeats()
       const func = updateMeta(meta, new Date(), seats)
       const response = await func()
       if (response !== false) {
